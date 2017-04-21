@@ -13,6 +13,12 @@ int main(int argc, char **argv) {
 	Mode mode = UNDEFINED;
 	std::vector<char*> args;
 
+	// debug
+	//archiver = new Archiver("arch.arch", true);
+	//archiver->addFile("testdir", "");
+	//archiver->writeArchive();
+	//delete archiver;
+
 	for (int i = 1; i < argc; i++) { //skip first argument, because it is executabke path
 		args.push_back(argv[i]);
 	}
@@ -36,6 +42,7 @@ int main(int argc, char **argv) {
 
 	if (mode == UNDEFINED) {
 		printf("Usage: archiver [-pack output_file] [-unpack] filepaths...\n");
+		return -1;
 	}
 
 	if (args.size() == 0) {
@@ -45,7 +52,7 @@ int main(int argc, char **argv) {
 
 	if (mode == PACK) {
 		for (int i = 0; i < args.size(); i++) {
-			archiver->addFile(args[i]);
+			archiver->addFile(args[i], "");
 		}
 		archiver->writeArchive();
 		return 0;

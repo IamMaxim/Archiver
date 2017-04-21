@@ -27,6 +27,12 @@
     <ClInclude Include="Archiver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="FS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="dirent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

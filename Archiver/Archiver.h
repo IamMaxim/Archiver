@@ -7,6 +7,7 @@
 #include <sstream>
 #include <direct.h>
 #include <regex>
+#include "FS.h"
 
 class Archiver {
 public:
@@ -36,10 +37,6 @@ private:
 	std::ofstream *ofs;
 	std::ifstream *ifs;
 	uint64_t headerLength;
-
-	std::vector<std::string> getFilesInDir(std::string dir) {
-
-	}
 
 	void preWriteHeader() {
 		uint64_t blank = 0;
@@ -137,15 +134,7 @@ private:
 		}
 	}
 
-	~Archiver() {
-		printf("Destroying archiver '%s'\n", filepath);
-		if (write)
-			ofs->close();
-		else
-			ifs->close();
-	}
-
-	inline bool fileExists(const std::string& name) {
+	inline bool fileExists(const std::string &name) {
 		if (FILE *file = fopen(name.c_str(), "r")) {
 			fclose(file);
 			return true;
@@ -164,8 +153,27 @@ public:
 			ifs = new std::ifstream(filename, std::ios::in | std::ios::binary);
 	}
 
-	void addFile(char* filename) {
-		files.push_back(File(new std::string(filename)));
+	~Archiver() {
+		printf("Destroying archiver '%s'\n", filepath);
+		if (write)
+			ofs->close();
+		else
+			ifs->close();
+	}
+
+	void addFile(char* filename, char* dir) {
+		std::string filepath = std::string(dir);
+		std::replace(filepath.begin(), filepath.end(), '\\', '/');
+		if (!filepath.empty() && filepath.at(filepath.size() - 1) != '/')
+			filepath += "/";
+		filepath += filename;
+
+		if (isDir(filepath)) {
+			std::vector<std::string> files = getFilesInDir((char*) filepath.c_str());
+			for each (std::string f in files)
+				addFile((char*)f.c_str(), (char*)filepath.c_str());
+		} else
+			files.push_back(File(new std::string(filepath)));
 	}
 
 	void writeArchive() {
@@ -188,17 +196,13 @@ public:
 	}
 
 	void restoreFile(int index) {
-		struct stat info;
-
 		File f = files[index];
 		std::string path = *f.filename;
-
-		path = std::regex_replace(path, std::regex("\\\\"), "/");
-		if (int pos = path.find("/") != -1) {
-			std::string dir = path.substr(0, path.find("/"));
-			if (stat(dir.c_str(), &info) != 0) {
-				mkdir(dir.c_str());
-			}
+		std::replace(path.begin(), path.end(), '\\', '/');
+		if (path.find("/") != -1) {
+			std::string dir = path.substr(0, path.find_last_of("/"));
+			if (!isDir(dir))
+				mkDirs(dir);
 		}
 
 		std::ofstream *ofs = new std::ofstream(path, std::ios::out | std::ios::binary);
@@ -207,7 +211,7 @@ public:
 		uint64_t read = 0;
 		char buffer[BUFFER_SIZE]; //byte buffer
 		while (true) {
-			int toRead = std::min(f.length - read, BUFFER_SIZE);
+			int toRead = min(f.length - read, BUFFER_SIZE);
 
 			if (toRead <= 0)
 				break;
