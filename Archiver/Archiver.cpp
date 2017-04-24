@@ -1,6 +1,5 @@
 #include <iostream>
 #include "Archiver.h"
-#include <vector>
 
 enum Mode {
 	UNDEFINED,
@@ -14,12 +13,12 @@ int main(int argc, char **argv) {
 	std::vector<char*> args;
 
 	// debug
-	//archiver = new Archiver("arch.arch", true);
-	//archiver->addFile("testdir", "");
-	//archiver->writeArchive();
-	//delete archiver;
+/*	archiver = new Archiver("arch.arch", true);
+	archiver->addFile("testdir", "");
+	archiver->writeArchive();
+	delete archiver;*/
 
-	for (int i = 1; i < argc; i++) { //skip first argument, because it is executabke path
+	for (int i = 1; i < argc; i++) { //skip first argument, because it is executable path
 		args.push_back(argv[i]);
 	}
 
@@ -32,7 +31,7 @@ int main(int argc, char **argv) {
 				return -1;
 			}
 			archiver = new Archiver(args[i + 1], true);
-			args.erase(args.begin() + i, args.begin() + i + 2);
+			args.erase(args.begin() + i, args.begin() + i + 2); //erase parsed arguments
 			i--; //repeat this index again
 		} else if (strcmp(args[i], "-unpack") == 0) {
 			mode = UNPACK;
@@ -52,7 +51,7 @@ int main(int argc, char **argv) {
 
 	if (mode == PACK) {
 		for (int i = 0; i < args.size(); i++) {
-			archiver->addFile(args[i], "");
+			archiver->addFile(args[i], (char *) "");
 		}
 		archiver->writeArchive();
 		return 0;
